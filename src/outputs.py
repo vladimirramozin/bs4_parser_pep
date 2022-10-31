@@ -1,7 +1,7 @@
+import csv
 import datetime as dt
 import logging
 
-import pandas as pd
 from prettytable import PrettyTable
 
 from constants import BASE_DIR, DATETIME_FORMAT
@@ -42,12 +42,7 @@ def file_output(results, cli_args):
     now_formatted = now.strftime(DATETIME_FORMAT)
     file_name = f'{parser_mode}_{now_formatted}.csv'
     file_path = results_dir / file_name
-    with open(file_path, 'w', encoding='utf-8', newline=''):
-        n = [[] for _ in range(len(results[0]))]
-        for i in range(len(results[0])):
-            for result in results:
-                n[i].append(result[i])
-        data = {head: values for head, *values in n}
-        df = pd.DataFrame(data)
-        df.to_csv(file_path, sep=';', index=False)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        writer = csv.writer(f, dialect='unix')
+        writer.writerows(results)
     logging.info(f'Файл с результатами был сохранён: {file_path}')
