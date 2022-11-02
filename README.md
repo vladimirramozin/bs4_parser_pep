@@ -9,30 +9,24 @@
 скачивание архива документации Python, парсинг статусов документации PEP, парсинг обновлений версий Python. 
 Для начала работы, после установки зависимостей в териманале 
 ввести команду (будут выведены параметры).
-
-
-	Command(⌘) + пробел
-
-
-
-
-python main.py -h
-
+```
+$ python main.py -h
+```
 Парсинг статусов PEP
 ```
-python main.py pep
+$ python main.py pep
 ```
 Парсинг новвоведений Python
 ```
-python main.py wats-new
+$ python main.py wats-new
 ```
 Загрузка документации
 ```
-python main.py download
+$ python main.py download
 ```
 Парсинг статусов версий Python
 ```
-python main.py latest-versions
+$ python main.py latest-versions
 ```
 ## Системные требования:
 appdirs==1.4.4
