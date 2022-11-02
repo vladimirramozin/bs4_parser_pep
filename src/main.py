@@ -9,6 +9,7 @@ from tqdm import tqdm
 from configs import configure_argument_parser, configure_logging
 from constants import (BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_DOC_URL,
                        STATUS)
+from exceptions import ParserFindTagException
 from outputs import control_output
 from utils import find_tag, get_response
 
@@ -18,15 +19,15 @@ def pep(session):
        и собирает статусы версий"""
     result_for_common_page = main_pep(session)
     result_for_end_point = {}
+    if response_end_point is None:
+        raise ConnectionError
     for key in tqdm(
-        set(result_for_common_page.keys()),
+        result_for_common_page,
         desc='процесс загрузки информации'
         'с конечных  страниц документации PEP'
     ):
         url_end_point_pep = urljoin(PEP_DOC_URL, key)
         response_end_point = get_response(session, url_end_point_pep)
-        if response_end_point is None:
-            return None
         soup_end_point = BeautifulSoup(
             response_end_point.text,
             features='lxml'
@@ -37,6 +38,8 @@ def pep(session):
             status.next_element.next_element.
             next_element.next_element.text
         )
+        if status_value is None:
+            raise ParserFindTagException
         result_for_end_point[key] = status_value
     result = [('Статус', 'Количество')]
     result_for_end_point_values = list(result_for_end_point.values())
@@ -56,7 +59,7 @@ def main_pep(session):
     url_info_pep = PEP_DOC_URL
     response = get_response(session, url_info_pep)
     if response is None:
-        return None
+        raise ConnectionError
     soup = BeautifulSoup(response.text, features='lxml')
     tags_tr = soup.find_all('a')
     pattern = r'/pep-\d+'
@@ -83,7 +86,7 @@ def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
     response = get_response(session, whats_new_url)
     if response is None:
-        return None
+        raise ConnectionError
     soup = BeautifulSoup(response.text, features='lxml')
     main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
     div_with_ul = find_tag(main_div, 'div', attrs={'class': 'toctree-wrapper'})
@@ -113,7 +116,7 @@ def latest_versions(session):
     """функция парсит версии Python и выводит в каком они статусе"""
     response = get_response(session, MAIN_DOC_URL)
     if response is None:
-        return None
+        raise ConnectionError
     soup = BeautifulSoup(response.text, features='lxml')
     sidebar = soup.find_all('div', attrs={'class': 'sphinxsidebarwrapper'})
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
@@ -126,20 +129,20 @@ def latest_versions(session):
         if 'All versions' in ul.text:
             a_tags = ul.find_all('a')
             for a_tag in a_tags:
-                try:
-                    if 'All' in str(a_tag.text):
-                        link = a_tag['href']
-                        version, status = a_tag.text, ''
-                        results.append((link, version, status))
-                    res = []
+                if 'All' in str(a_tag.text):
                     link = a_tag['href']
-                    text_match = re.search(pattern, a_tag.text)
-                    res.append(link)
-                    buf = list(text_match.group(1, 2))
-                    version, status = buf
-                    results.append((link, version, status))
-                except BaseException:
                     version, status = a_tag.text, ''
+                    results.append((link, version, status))
+                    break
+                res = []
+                link = a_tag['href']
+                text_match = re.search(pattern, a_tag.text)
+                res.append(link)
+                buf = list(text_match.group(1, 2))
+                version, status = (
+                    text_match.groups() if text_match else (a_tag.text, '')
+                )
+                results.append((link, version, status))
             break
     else:
         raise Exception('Ничего не нашлось')
@@ -151,7 +154,7 @@ def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
     response = get_response(session, downloads_url)
     if response is None:
-        return
+        raise ConnectionError
     soup = BeautifulSoup(response.text, 'lxml')
     tags = soup.find_all('td')
     downloads_dir = BASE_DIR / 'downloads'
@@ -163,7 +166,6 @@ def download(session):
             filename = archive_url.split('/')[-1]
             archive_path = downloads_dir / filename
             response = session.get(archive_url)
-            print(type(archive_path))
             with open(archive_path, 'wb') as file:
                 file.write(response.content)
             logging.info(f'Архив был загружен и сохранён: {archive_path}')
