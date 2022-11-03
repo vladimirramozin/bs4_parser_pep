@@ -21,16 +21,19 @@ $ python main.py pep
 `
 
 Парсинг новвоведений Python
+
 `
 $ python main.py wats-new
 `
 
 Загрузка документации
+
 `
 $ python main.py download
 `
 
 Парсинг статусов версий Python
+
 `
 $ python main.py latest-versions
 `
