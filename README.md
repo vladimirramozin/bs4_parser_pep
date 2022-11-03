@@ -13,21 +13,21 @@
 $ python main.py -h
 `
 Парсинг статусов PEP
-```
+'
 $ python main.py pep
-```
+`
 Парсинг новвоведений Python
-```
+`
 $ python main.py wats-new
-```
+`
 Загрузка документации
-```
+`
 $ python main.py download
-```
+`
 Парсинг статусов версий Python
-```
+`
 $ python main.py latest-versions
-```
+`
 ## Системные требования:
 appdirs==1.4.4
 atomicwrites==1.4.1
