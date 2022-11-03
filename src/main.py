@@ -19,8 +19,6 @@ def pep(session):
        и собирает статусы версий"""
     result_for_common_page = main_pep(session)
     result_for_end_point = {}
-    if response_end_point is None:
-        raise ConnectionError
     for key in tqdm(
         result_for_common_page,
         desc='процесс загрузки информации'
@@ -122,6 +120,7 @@ def latest_versions(session):
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
     ul_tags = []
     results = []
+    results.append(('Адрес', 'Версия', 'Статус'))
     pattern = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
     for i in sidebar:
         ul_tags = i.find_all('ul')
@@ -134,13 +133,10 @@ def latest_versions(session):
                     version, status = a_tag.text, ''
                     results.append((link, version, status))
                     break
-                res = []
                 link = a_tag['href']
                 text_match = re.search(pattern, a_tag.text)
-                res.append(link)
-                buf = list(text_match.group(1, 2))
                 version, status = (
-                    text_match.groups() if text_match else (a_tag.text, '')
+                    text_match.group(1, 2) if text_match else (a_tag.text, '')
                 )
                 results.append((link, version, status))
             break
