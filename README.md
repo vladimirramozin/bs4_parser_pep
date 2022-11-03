@@ -13,7 +13,7 @@
 $ python main.py -h
 `
 Парсинг статусов PEP
-'
+`
 $ python main.py pep
 `
 Парсинг новвоведений Python
