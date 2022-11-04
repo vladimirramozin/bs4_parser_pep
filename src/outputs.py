@@ -8,9 +8,7 @@ from constants import BASE_DIR, DATETIME_FORMAT
 
 
 def control_output(results, cli_args):
-    """функция вызывает вариант вывода из привиденных ниже.
-    КАК ЗДЕСЬ ВЫВЕСТИ СЛОВАРЬ OUTPUTS В ФАЙЛ constatns.py,
-    ЧТОБЫ ИЗБЕЖАТЬ ЦИКЛИЧЕСКОГО ИМПОРТА???
+    """функция вызывает вариант вывода из привиденных ниже
     """
     try:
         OUTPUTS[cli_args.output](results, cli_args)
